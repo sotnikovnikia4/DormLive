@@ -13,6 +13,7 @@ import ru.dormlive.backend.util.Converter;
 import ru.dormlive.backend.util.exception.ChatRoomNotCreatedException;
 import ru.dormlive.backend.util.exception.ChatRoomNotFoundException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -57,7 +58,7 @@ public class ChatRoomService {
         String authenticatedUserId = ((UserDetailsImpl)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser().getNickname();
         List<ChatRoom> chatRoomEntities = chatRoomRepository.findChatRoomEntitiesByMembersContainingIgnoreCase(authenticatedUserId);
         if(chatRoomEntities == null || chatRoomEntities.isEmpty()){
-            throw new ChatRoomNotFoundException();
+            return new ArrayList<>();
         }
         return chatRoomEntities.stream().map(Converter::chatRoomEntityToDto).toList();
     }
