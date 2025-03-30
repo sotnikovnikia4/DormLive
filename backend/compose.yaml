@@ -1,0 +1,55 @@
+services:
+  dormlive-java:
+    build: ./
+    restart: on-failure
+#    container_name: dormlive-backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - dormlive-db
+    environment:
+      SPRING_APPLICATION_JSON: '{
+        "spring.data.mongodb.uri": "mongodb://$MONGO_ROOT_USER:$MONGO_ROOT_PASSWORD@dormlive-db:27017/$MONGO_DATABASE?authSource=admin",
+        "server.error.include.message": "never",
+        "jwt_secret": "$JWT_SECRET",
+        "cors.allowedOrigins": "$CORS_ALLOWED_ORIGINS"
+      }'
+    env_file: "./.env"
+#    volumes:
+#      - .m2:/root/.m2
+#    stdin_open: true
+#    tty: true
+
+  dormlive-db:
+    image: mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE}
+    volumes:
+      - backendDB:/data/db
+      - backendDB_config:/data/configdb
+#    container_name: dormlive-db
+    env_file: "./.env"
+
+volumes:
+  backendDB:
+  backendDB_config:
+
+
+#services:
+#  mongo_db:
+#    image: mongo:5.0.2
+#    restart: unless-stopped
+#    env_file: ./.env
+#    environment:
+#      - MONGO_INITDB_ROOT_USERNAME=$MONGODB_USER
+#      - MONGO_INITDB_ROOT_PASSWORD=$MONGODB_PASSWORD
+#    ports:
+#      - $MONGODB_LOCAL_PORT:$MONGODB_DOCKER_PORT
+#    volumes:
+#      - db:/data/db
+#      - ./init-db.js:/docker-entrypoint-initdb.d/init-db.js:ro
